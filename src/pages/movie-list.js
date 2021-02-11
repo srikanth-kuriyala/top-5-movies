@@ -6,66 +6,42 @@ import data from "../top5MoviesAssessement.json";
 
 const movies = data.components[1];
 
-class MovieList extends Component {
-    constructor() {
-        super();
-        this.state = {
-            showModal: 0
-        }
-        this.handleOrderBy = this.handleOrderBy.bind(this);
-    }
-    componentDidMount() {
-        this.props.movieList('releaseDate', movies);
-    }
-
-    handleOrderBy(event) {
-        this.props.movieList(event.target.value, movies);
-    }
-
-    getModal = value => {
-        this.setState({ showModal: value });
-    };
-
-    hideModal = value => {
-        this.setState({ showModal: 0 });
-    };
-
-    render() {
-        return (
-            <div>
-                <span>Order By : </span>
-                <select onChange={this.handleOrderBy}>
-                    { data.components[0] ? data.components[0].items.map((item, index) => (
-                        <option key={item.id} value={item.valueToOrderBy}>{item.label}</option>
-                    )) : ''}
-                </select>
-                <ul>
-                    { this.props.items ?
-                        this.props.items.map((item, index) => (
-                            <li key={item.id}>
-                                <img src={item.imageUrl} onClick={() => this.getModal(item.id)} alt={item.title}/>
-                                <h2>{item.title}</h2>
-                                <ModalPopup item={item} show={this.state.showModal === item.id} onHide={()=> this.hideModal(item.id)}/>
-                            </li>
-                        ))
-                    :
-                        <p>No movies found!</p>
-                    }
-                </ul>
-            </div>
-        )
-    }
+function MovieList(props) {
+    return (
+        <div>
+            <span>Order By : </span>
+            <select onChange={(event) => props.movieList(event.target.value, movies)}>
+                { data.components[0] ? data.components[0].items.map((item, index) => (
+                    <option key={item.id} value={item.valueToOrderBy}>{item.label}</option>
+                )) : ''}
+            </select>
+            <ul>
+                { props.items ?
+                    props.items.map((item, index) => (
+                        <li key={item.id}>
+                            <img src={item.imageUrl} onClick={() => props.getModal(item.id)} alt={item.title}/>
+                            <h2>{item.title}</h2>
+                            <ModalPopup item={item} show={props.showModal === item.id} onHide={()=> props.hideModal()}/>
+                        </li>
+                    ))
+                :
+                    <p>No movies found!</p>
+                }
+            </ul>
+        </div>
+    )
 }
 
-const mapStateToProps = state => {
-    return ({
-        items: state.items,
-        order: state.order
-    })
-};
+const mapStateToProps = state => ({
+    items: state.items,
+    order: state.order,
+    showModal: state.showModal
+})
 
 const mapDispatchToProps = dispatch => ({
-    movieList: (order, items) => dispatch(ACTIONS.movieList(order, items))
+    movieList: (order, items) => dispatch(ACTIONS.movieList(order, items)),
+    getModal: (id) => dispatch(ACTIONS.getModal(id)),
+    hideModal: () => dispatch(ACTIONS.hideModal())
 });
 
 export default connect(
